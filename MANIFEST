@@ -1,0 +1,14 @@
+Build.PL
+lib/Module/Build/Bundle.pm
+MANIFEST			This list of files
+META.yml
+README
+t/00-load.t
+t/Dummy.pm
+t/Dummy2.pm
+t/pod.t
+t/runtests.t
+t/Test/Class/Module/Build/Bundle.pm
+t/Test/Class/Module/Build/Bundle/Contents.pm
+t/Test/Class/Module/Build/Regression.pm
+TODO
