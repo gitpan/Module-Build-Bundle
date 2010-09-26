@@ -1,6 +1,6 @@
 package Test::Class::Module::Build::Bundle::Contents;
 
-# $Id: Contents.pm 7243 2010-09-13 19:14:24Z jonasbn $
+# $Id: Contents.pm 7288 2010-09-21 19:47:04Z jonasbn $
 
 use strict;
 use warnings;
@@ -25,7 +25,7 @@ sub setup : Test(setup => 2) {
         dist_abstract => 'this is a dummy',
         requires => {
             'Module::Build' => '0',
-            'Module::Info' => '0.31',
+            'Text::Soundex' => '2.00',
         },
     ), 'calling constructor');
 
@@ -38,17 +38,17 @@ sub contents : Test(3) {
     
     my $build = $test->{build};
 
-    cp("t/$test->{file}", "$test->{file}")
+    cp("t/$test->{file}", "lib/$test->{file}")
         or die "Unable to copy file: $test->{file} - $!";
     
     ok($build->ACTION_contents);
     
-    open FIN, '<', $test->{file} or die "Unable to open file: $!";
+    open FIN, '<', "lib/$test->{file}" or die "Unable to open file: $!";
     my $content = join '', <FIN>;
     close FIN;
     
     like($content, qr/=item \* L<Module::Build\|Module::Build>/s);
-    like($content, qr/=item \* L<Module::Info\|Module::Info>, 0\.31/);
+    like($content, qr/=item \* L<Text::Soundex\|Text::Soundex>, 2\.00/);
 
     $test->{build} = $build;
 };
@@ -58,20 +58,20 @@ sub extended : Test(3) {
     
     my $build = $test->{build};
 
-    cp("t/$test->{file}", "$test->{file}")
-        or die "Unable to copy file: $test->{file} - $!";
+    cp("t/$test->{file}", "lib/$test->{file}")
+        or die "Unable to copy file: lib/$test->{file} - $!";
     
     #HACK: we cheat and pretend to be 5.12.0
     $Module::Build::Bundle::myPERL_VERSION = 5.12.0;
     
     ok($build->ACTION_contents);
 
-    open FIN, '<', $test->{file} or die "Unable to open file: $!";
+    open FIN, '<', "lib/$test->{file}" or die "Unable to open file: $!";
     my $content = join '', <FIN>;
     close FIN;
     
     like($content, qr/=item \* L<Module::Build\|Module::Build>/s);
-    like($content, qr[=item \* L<Module::Info\|Module::Info>, L<0\.31\|http://search.cpan.org/dist/Module-Info-0.31/lib/Module/Info.pm>]);
+    like($content, qr[=item \* L<Text::Soundex\|Text::Soundex>, L<2\.00\|http://search.cpan.org/dist/Text-Soundex-2\.00/lib/Text/Soundex.pm>]);
 };
 
 sub death_by_section_header : Test(1) {
@@ -79,8 +79,8 @@ sub death_by_section_header : Test(1) {
     
     my $build = $test->{build};
 
-    cp("t/$test->{file}", "$test->{file}")
-        or die "Unable to copy file: $test->{file} - $!";
+    cp("t/$test->{file}", "lib/$test->{file}")
+        or die "Unable to copy file: lib/$test->{file} - $!";
 
     $build->notes('section_header' => 'TO DEATH');
         
@@ -104,7 +104,7 @@ sub section_header : Test(2) {
 
     $test->{file} = 'Dummy2.pm';
     
-    cp("t/$test->{file}", "Dummy2.pm")
+    cp("t/$test->{file}", 'lib/Dummy2.pm')
         or die "Unable to copy file: $test->{file} - $!";
 
     ok($build->ACTION_contents);
@@ -119,7 +119,7 @@ sub teardown : Test(teardown) {
     my $file = $test->{file};
     my $build = $test->{build};
     
-    unlink($file) or die "Unable to remove file: $file - $!";
+    unlink("lib/$file") or die "Unable to remove file: lib/$file - $!";
     
     $build->notes('section_header' => '');
 }

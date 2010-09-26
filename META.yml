@@ -13,7 +13,7 @@ name: Module-Build-Bundle
 provides:
   Module::Build::Bundle:
     file: lib/Module/Build/Bundle.pm
-    version: 0.01
+    version: 0.02
 requires:
   Carp: 0
   Cwd: 0
@@ -33,4 +33,4 @@ resources:
   homepage: http://logiclab.jira.com/wiki/display/MBB/Home
   license: http://www.perlfoundation.org/artistic_license_1_0
   repository: http://logicLAB.jira.com/svn/MBB
-version: 0.01
+version: 0.02

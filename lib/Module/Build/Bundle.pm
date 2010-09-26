@@ -1,19 +1,20 @@
 package Module::Build::Bundle;
 
-# $Id: Bundle.pm 7246 2010-09-14 13:07:05Z jonasbn $
+# $Id: Bundle.pm 7289 2010-09-21 19:49:12Z jonasbn $
 
-use 5.6.0; #$^V
+use 5.006; #$^V
 use strict;
 use warnings;
 use Carp qw(croak);
 use Cwd qw(getcwd);
 use Tie::IxHash;
 use English qw( -no_match_vars );
-use base 'Module::Build::Base';
+
+use base qw(Module::Build);
 
 use constant EXTENDED_POD_LINK_VERSION => 5.12.0;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 #HACK: we need a writable copy for testing purposes
 our $myPERL_VERSION = $^V; 
@@ -72,7 +73,7 @@ sub ACTION_contents {
     my @path = split /::/, $self->{properties}->{module_name}
         || $self->{properties}->{module_name};
 
-    my $file = $cwd.'/'. (join '/', @path) .'.pm';
+    my $file = $cwd.'/lib/'. (join '/', @path) .'.pm';
     open(FIN, '+<', $file)
         or croak "Unable to open file: $file - $!";
         
@@ -277,8 +278,7 @@ it executes it.
 
 =head2 create_mymeta
 
-This method has been lifted from L<Module::Build::Base|Module::Build::Base> and
-altered.
+This method has been lifted from L<Module::Build::Base|Module::Build::Base> and altered.
 
 It sets the:
 
@@ -323,9 +323,37 @@ For Module::Build::Bundle:
 
 =item * No <section> section to be replaced
 
+If the POD to be updated does not contain a placeholder section the action
+will die with the above message.
+
+The default minimal section should look something like:
+
+    =head1 CONTENTS
+    
+    =head1
+    
+Or if you provide your own section_header
+
+    =head1 <section header>
+    
+    =head1
+
 =back
 
 =head1 CONFIGURATION AND ENVIRONMENT
+
+=head2 CONTENTS SECTION
+
+The module does per default look for the section named: CONTENTS.
+
+This is the section used in Bundles, this can be overwritten using the section
+parameter.
+
+For example L<Perl::Critic::logicLAB|Perl::Critic::logicLAB> uses a section
+named POLICIES and L<Task::BeLike::JONASBN> uses DEPENDENCIES.
+
+The problem is that the section has to be present or else the contents action
+will throw an error.
 
 Module::Build::Bundle is primarily aimed at Bundle distributions. Their use is
 however no longer recommended and L<Task> provides a better way.
@@ -355,19 +383,6 @@ Currently the module only supports Bundle/Task distributions based on
 Module::Build. The implementation is based on a subclass of Module::Build, which
 can replace Module::Build (See: L</SYNOPSIS>).
 
-=head2 CONTENTS
-
-The module does per default look for the section named: CONTENTS.
-
-This is the section used in Bundles, this can be overwritten using the section
-parameter.
-
-For example L<Perl::Critic::logicLAB|Perl::Critic::logicLAB> uses a section
-named POLICIES and L<Task::BeLike::JONASBN> uses DEPENDENCIES.
-
-The problem is that the section has to be present or else the contents action
-will throw an error.
-
 =head1 SEE ALSO
 
 =over
@@ -392,7 +407,7 @@ The motivation was driven by two things.
 
 =item * The joy of fooling around with Module::Build
 
-=item The need for automating the documentation generation
+=item * The need for automating the documentation generation
 
 =back
 
@@ -424,3 +439,9 @@ but then I needed it for some other distributions, so I decided to separate it o
 
 =head1 LICENSE AND COPYRIGHT
 
+Copyright 2010 jonasbn, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut

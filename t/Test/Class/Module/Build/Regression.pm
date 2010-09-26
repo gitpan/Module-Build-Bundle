@@ -1,6 +1,6 @@
 package Test::Class::Module::Build::Regression;
 
-# $Id: Regression.pm 7247 2010-09-14 13:07:32Z jonasbn $
+# $Id: Regression.pm 7292 2010-09-26 14:36:49Z jonasbn $
 
 use strict;
 use warnings;
@@ -48,7 +48,7 @@ sub do_create_meta : Test(7) {
     my $version = $test->{version};
     my $canonical_version = $test->{canonical};
     
-    ok($build->metafile('t/META.yml'));
+    ok($build->metafile('t/testMETA.yml'));
 
     ok($build->do_create_metafile);
 
@@ -76,8 +76,8 @@ sub create_mymeta : Test(8) {
     my $version = $test->{version};
     my $canonical_version = $test->{canonical};
 
-    ok($build->metafile('t/META.yml'));    
-    ok($build->mymetafile('t/MYMETA.yml'));
+    ok($build->metafile('t/testMETA.yml'));    
+    ok($build->mymetafile('t/testMYMETA.yml'));
 
     ok($build->create_mymeta());
 
@@ -100,8 +100,11 @@ sub teardown : Test(teardown) {
     my $test = shift;
     
     my $file = $test->{file};
+    my $build = $test->{build};
     
     unlink($file) or die "Unable to remove file: $file - $!";
+    
+    $build->dispatch('realclean');
 };
 
 1;
