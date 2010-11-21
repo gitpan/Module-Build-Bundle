@@ -1,4 +1,4 @@
-# $Id: runtests.t 7235 2010-09-13 11:56:50Z jonasbn $
+# $Id: runtests.t 7351 2010-11-21 19:22:09Z jonasbn $
 
 use strict;
 use warnings;
@@ -9,7 +9,7 @@ use FindBin;
 use lib "$FindBin::Bin/../t";
 
 use Test::Class::Module::Build::Bundle;
-use Test::Class::Module::Build::Bundle::Contents;
-use Test::Class::Module::Build::Regression;
+#use Test::Class::Module::Build::Bundle::Contents;
+#use Test::Class::Module::Build::Regression;
 
 Test::Class->runtests();

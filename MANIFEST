@@ -4,15 +4,11 @@ lib/Module/Build/Bundle.pm
 MANIFEST			This list of files
 META.yml
 README
-t/.DS_Store
 t/00-load.t
 t/Dummy.pm
 t/Dummy2.pm
 t/pod.t
 t/runtests.t
-t/Test/.DS_Store
-t/Test/Class/.DS_Store
-t/Test/Class/Module/.DS_Store
 t/Test/Class/Module/Build/Bundle.pm
 t/Test/Class/Module/Build/Bundle/Contents.pm
 t/Test/Class/Module/Build/Regression.pm
