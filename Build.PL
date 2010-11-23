@@ -1,6 +1,6 @@
 # Build.PL for Module::Build::Bundle
 
-# $Id: Build.PL 7234 2010-09-13 11:55:51Z jonasbn $
+# $Id: Build.PL 7358 2010-11-23 06:53:12Z jonasbn $
 
 use strict;
 use warnings;
@@ -25,6 +25,7 @@ my $build = Module::Build->new(
         'Test::More'          => '0',       #test
         'Tie::IxHash'         => '0',
         'perl'                => '5.6.0',
+        'Test::MockObject::Extends' => '0', #test
     },
     meta_merge => {
         resources => {
