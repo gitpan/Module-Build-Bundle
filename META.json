@@ -1,0 +1,66 @@
+{
+   "abstract" : "build assistance for Bundle and Task distributions",
+   "author" : [
+      "Jonas B. Nielsen (jonasbn), <jonasbn@cpan.org>"
+   ],
+   "dynamic_config" : 1,
+   "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.110930",
+   "license" : [
+      "artistic_1"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Module-Build-Bundle",
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "Module::Build" : 0
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "Module::Build" : "0.38"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Carp" : 0,
+            "Cwd" : 0,
+            "English" : 0,
+            "File::Copy" : 0,
+            "FindBin" : 0,
+            "Module::Build::YAML" : 0,
+            "Test::Class" : 0,
+            "Test::MockObject::Extends" : 0,
+            "Test::More" : 0,
+            "Tie::IxHash" : 0,
+            "perl" : "v5.6.0"
+         }
+      }
+   },
+   "provides" : {
+      "Module::Build::Bundle" : {
+         "file" : "lib/Module/Build/Bundle.pm",
+         "version" : "0.05"
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "http://rt.cpan.org/NoAuth/Bugs.html?Dist=Module-Build-Bundle"
+      },
+      "homepage" : "http://logiclab.jira.com/wiki/display/MBB/Home",
+      "license" : [
+         "http://www.perlfoundation.org/artistic_license_1_0"
+      ],
+      "repository" : {
+         "url" : "http://logicLAB.jira.com/svn/MBB"
+      },
+      "x_ProjectChangelog" : "http://logiclab.jira.com/browse/MBB#selectedTab=com.atlassian.jira.plugin.system.project%3Achangelog-panel",
+      "x_ProjectSite" : "http://logicLAB.jira.com/browse/MBB",
+      "x_ProjectWiki" : "http://logiclab.jira.com/wiki/display/MBB/Home"
+   },
+   "version" : "0.05"
+}

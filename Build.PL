@@ -1,6 +1,6 @@
 # Build.PL for Module::Build::Bundle
 
-# $Id: Build.PL 7358 2010-11-23 06:53:12Z jonasbn $
+# $Id: Build.PL 7622 2011-04-23 11:39:22Z jonasbn $
 
 use strict;
 use warnings;
@@ -14,6 +14,9 @@ my $build = Module::Build->new(
     dist_abstract => 'build assistance for Bundle and Task distributions',
     license       => 'artistic',
     create_readme => 1,
+    build_requires => {
+        'Module::Build' => '0',
+    },
     requires      => {
         'Carp'                => '0',
         'Cwd'                 => '0',

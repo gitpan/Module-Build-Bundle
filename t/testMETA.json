@@ -1,0 +1,31 @@
+{
+   "abstract" : "this is a dummy",
+   "author" : [
+      "jonasbn"
+   ],
+   "dynamic_config" : 1,
+   "generated_by" : "T::MO::E::b version 0.3901, CPAN::Meta::Converter version 2.110930",
+   "license" : [
+      "unknown"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Dummy",
+   "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "T::MO::E::b" : "0.3901"
+         }
+      }
+   },
+   "provides" : {
+      "Module::Build::Bundle" : {
+         "file" : "lib/Module/Build/Bundle.pm",
+         "version" : "0.04"
+      }
+   },
+   "release_status" : "stable",
+   "version" : "6.66"
+}
