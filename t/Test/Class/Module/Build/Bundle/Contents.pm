@@ -1,6 +1,6 @@
 package Test::Class::Module::Build::Bundle::Contents;
 
-# $Id: Contents.pm 7288 2010-09-21 19:47:04Z jonasbn $
+# $Id: Contents.pm 7662 2011-05-06 15:51:57Z jonasbn $
 
 use strict;
 use warnings;
@@ -40,6 +40,9 @@ sub contents : Test(3) {
 
     cp("t/$test->{file}", "lib/$test->{file}")
         or die "Unable to copy file: $test->{file} - $!";
+
+    #HACK: we cheat and pretend to be 5.10.1
+    $Module::Build::Bundle::myPERL_VERSION = 5.10.1;
     
     ok($build->ACTION_contents);
     

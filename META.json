@@ -43,7 +43,7 @@
    "provides" : {
       "Module::Build::Bundle" : {
          "file" : "lib/Module/Build/Bundle.pm",
-         "version" : "0.05"
+         "version" : "0.06"
       }
    },
    "release_status" : "stable",
@@ -62,5 +62,5 @@
       "x_ProjectSite" : "http://logicLAB.jira.com/browse/MBB",
       "x_ProjectWiki" : "http://logiclab.jira.com/wiki/display/MBB/Home"
    },
-   "version" : "0.05"
+   "version" : "0.06"
 }
