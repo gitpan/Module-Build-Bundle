@@ -1,6 +1,6 @@
 # Build.PL for Module::Build::Bundle
 
-# $Id: Build.PL 7622 2011-04-23 11:39:22Z jonasbn $
+# $Id: Build.PL 7712 2011-06-08 21:38:49Z jonasbn $
 
 use strict;
 use warnings;
@@ -13,6 +13,7 @@ my $build = Module::Build->new(
     module_name   => 'Module::Build::Bundle',
     dist_abstract => 'build assistance for Bundle and Task distributions',
     license       => 'artistic',
+    create_makefile_pl => 'traditional',
     create_readme => 1,
     build_requires => {
         'Module::Build' => '0',
