@@ -1,6 +1,6 @@
 # Build.PL for Module::Build::Bundle
 
-# $Id: Build.PL 7712 2011-06-08 21:38:49Z jonasbn $
+# $Id: Build.PL 7978 2012-11-24 08:13:41Z jonasbn $
 
 use strict;
 use warnings;

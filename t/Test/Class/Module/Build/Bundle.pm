@@ -1,6 +1,6 @@
 package Test::Class::Module::Build::Bundle;
 
-# $Id: Bundle.pm 7622 2011-04-23 11:39:22Z jonasbn $
+# $Id: Bundle.pm 7978 2012-11-24 08:13:41Z jonasbn $
 
 use strict;
 use warnings;

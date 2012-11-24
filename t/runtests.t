@@ -1,4 +1,4 @@
-# $Id: runtests.t 7622 2011-04-23 11:39:22Z jonasbn $
+# $Id: runtests.t 7978 2012-11-24 08:13:41Z jonasbn $
 
 use strict;
 use warnings;

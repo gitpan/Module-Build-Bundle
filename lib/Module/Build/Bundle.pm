@@ -1,6 +1,6 @@
 package Module::Build::Bundle;
 
-# $Id: Bundle.pm 7731 2011-06-15 20:14:50Z jonasbn $
+# $Id: Bundle.pm 7978 2012-11-24 08:13:41Z jonasbn $
 
 use 5.006; #$^V
 use strict;
@@ -14,7 +14,7 @@ use base qw(Module::Build);
 
 use constant EXTENDED_POD_LINK_VERSION => 5.12.0;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 #HACK: we need a writable copy for testing purposes
 our $myPERL_VERSION = $^V; 
