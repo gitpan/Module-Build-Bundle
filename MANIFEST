@@ -1,17 +1,19 @@
 Build.PL
 Changes
 lib/Module/Build/Bundle.pm
+Makefile.PL
 MANIFEST			This list of files
+META.json
 META.yml
 README
 t/00-load.t
+t/04_critic.t
 t/Dummy.pm
 t/Dummy2.pm
+t/perlcriticrc
 t/pod.t
 t/runtests.t
 t/Test/Class/Module/Build/Bundle.pm
 t/Test/Class/Module/Build/Bundle/Contents.pm
 t/testMETA.json
 TODO
-META.json
-Makefile.PL

@@ -1,6 +1,6 @@
 # Build.PL for Module::Build::Bundle
 
-# $Id: Build.PL 7978 2012-11-24 08:13:41Z jonasbn $
+# $Id: Build.PL 8015 2012-12-02 07:52:46Z jonasbn $
 
 use strict;
 use warnings;
@@ -27,6 +27,8 @@ my $build = Module::Build->new(
         'Module::Build::YAML' => '0',       #test
         'Test::Class'         => '0',       #test
         'Test::More'          => '0',       #test
+        'Test::Exception'     => '0',       #test
+        'File::Tempdir'       => '0',       #test
         'Tie::IxHash'         => '0',
         'perl'                => '5.6.0',
         'Test::MockObject::Extends' => '0', #test

@@ -2,7 +2,7 @@ NAME
     Module::Build::Bundle - subclass for supporting Tasks and Bundles
 
 VERSION
-    This documentation describes version 0.07
+    This documentation describes version 0.09
 
 SYNOPSIS
         #In your Build.PL
@@ -36,15 +36,15 @@ DESCRIPTION
 
     *   Links to required/listed distributions, with or without versions
 
-    *   Links to specific versions of distributions for perl 5.12.0 if a
-        version is specified
+    *   Links to specific versions of distributions for perl 5.12.0 or newer
+        if a version is specified
 
     *   Inserts a POD section named CONTENTS or something specified by the
         caller
 
     This module adds a very basic action for propagating a requirements list
-    from a Build.PL file's requires section to the a POD section in the
-    distribution targetted.
+    from a Build.PL file's requires section to the a POD section in a
+    designated distribution.
 
 SUBROUTINES/METHODS
   ACTION_contents
@@ -73,7 +73,7 @@ SUBROUTINES/METHODS
 
     The section of course has to be present.
 
-    Based on your version of perl and you Build.PL requirements, the links
+    Based on your version of perl and your Build.PL requirements, the links
     will be rendered in the following formats:
 
     Basic:
@@ -136,6 +136,12 @@ SUBROUTINES/METHODS
             Module::Build::Bundle: 0.01
         generated_by: 'Module::Build::Bundle version 0.01'
 
+  do_create_metafile
+    This method has been lifted from Module::Build::Base and altered.
+
+    The method was overwritten to be more testable. The method created the
+    relevant META file.
+
 DIAGNOSTICS
     *   No <section> section to be replaced
 
@@ -180,7 +186,7 @@ INCOMPATIBILITIES
 
 BUGS AND LIMITATIONS
     Currently Module::Build::Bundle is not able to handle root based
-    distributions meaning distribtions with a single Perl module located in
+    distributions meaning distributions with a single Perl module located in
     the root directory instead of the lib structure.
 
     Apart from that there are no known special limitations or bugs at this
@@ -189,7 +195,32 @@ BUGS AND LIMITATIONS
 
     The module only supports Bundle/Task distributions based on
     Module::Build. The implementation is based on a subclass of
-    Module::Build, which can replace Module::Build (See: "SYNOPSIS").
+    Module::Build, which can replace Module::Build in your Build.PL (See:
+    "SYNOPSIS").
+
+    As described previously in the documentation a section of documentation
+    can only replaced. A section with the generated contents cannot be added
+    with out a placeholder in the form of designated section title. This
+    might be changed in the future.
+
+BUG REPORTING
+TEST AND QUALITY
+  TEST COVERAGE
+    ----------------------------------- ------ ------ ------ ------ ------
+    ------ File stmt bran cond sub time total
+    ----------------------------------- ------ ------ ------ ------ ------
+    ------ lib/Module/Build/Bundle.pm 73.7 50.0 57.1 85.7 100.0 69.0 Total
+    73.7 50.0 57.1 85.7 100.0 69.0 -----------------------------------
+    ------ ------ ------ ------ ------ ------
+
+    The above coverage report is based on release 0.08
+
+QUALITY AND CODING STANDARD
+DEVELOPMENT
+TODO
+    Please see:
+    <https://logiclab.jira.com/browse/MBB#selectedTab=com.atlassian.jira.plu
+    gin.system.project%3Aroadmap-panel>
 
 SEE ALSO
     *   Task
@@ -200,7 +231,9 @@ SEE ALSO
 
     *   CPAN
 
-    *   <http://cpansearch.perl.org/src/ANDK/CPAN-1.9402/lib/CPAN/Bundle.pm>
+    *   <CPAN::Bundle>
+
+    *   <https://logiclab.jira.com/wiki/display/OPEN/Module-Build-Bundle>
 
 MOTIVATION
     The motivation was driven by two things.
@@ -228,7 +261,7 @@ AUTHOR
     *   Jonas B. Nielsen (jonasbn) "<jonasbn@cpan.org>"
 
 LICENSE AND COPYRIGHT
-    Copyright 2010 jonasbn, all rights reserved.
+    Copyright 2010-2012 jonasbn, all rights reserved.
 
     This program is free software; you can redistribute it and/or modify it
     under the same terms as Perl itself.

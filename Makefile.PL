@@ -10,10 +10,12 @@ WriteMakefile
                            'Cwd' => '0',
                            'English' => '0',
                            'File::Copy' => '0',
+                           'File::Tempdir' => '0',
                            'FindBin' => '0',
                            'Module::Build' => 0,
                            'Module::Build::YAML' => '0',
                            'Test::Class' => '0',
+                           'Test::Exception' => '0',
                            'Test::MockObject::Extends' => '0',
                            'Test::More' => '0',
                            'Tie::IxHash' => '0'

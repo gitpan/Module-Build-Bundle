@@ -1,63 +1,64 @@
 package Module::Build::Bundle;
 
-# $Id: Bundle.pm 7978 2012-11-24 08:13:41Z jonasbn $
+# $Id: Bundle.pm 8020 2012-12-02 12:16:15Z jonasbn $
 
-use 5.006; #$^V
+use 5.006;    #$^V
 use strict;
 use warnings;
 use Carp qw(croak);
 use Cwd qw(getcwd);
 use Tie::IxHash;
 use English qw( -no_match_vars );
-
+use File::Slurp; #read_file
 use base qw(Module::Build);
 
 use constant EXTENDED_POD_LINK_VERSION => 5.12.0;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 #HACK: we need a writable copy for testing purposes
-our $myPERL_VERSION = $^V; 
+## no critic qw(Variables::ProhibitPackageVars Variables::ProhibitPunctuationVars)
+our $myPERL_VERSION = $^V;
 
 sub ACTION_build {
     my $self = shift;
 
-	if (! $self->{'_completed_actions'}{'contents'}) {
-		$self->ACTION_contents();
-	}
-	
-	return Module::Build::Base::ACTION_build($self);
+    if ( !$self->{'_completed_actions'}{'contents'} ) {
+        $self->ACTION_contents();
+    }
+
+    return Module::Build::Base::ACTION_build($self);
 }
 
 sub ACTION_contents {
     my $self = shift;
-   
+
     #Fetching requirements from Build.PL
-    my @list = %{$self->requires()};
-    
+    my @list = %{ $self->requires() };
+
     my $section_header = $self->notes('section_header') || 'CONTENTS';
-    
+
     my $sorted = 'Tie::IxHash'->new(@list);
     $sorted->SortByKey();
-    
+
     my $pod = "=head1 $section_header\n\n=over\n\n";
-    foreach ($sorted->Keys) {
-        my ($module, $version) = $sorted->Shift();
+    foreach ( $sorted->Keys ) {
+        my ( $module, $version ) = $sorted->Shift();
 
         my $dist = $module;
         $dist =~ s/::/\-/g;
-        
+
         my $module_path = $module;
         $module_path =~ s[::][/]g;
         $module_path .= '.pm';
-        
+
         if ( $myPERL_VERSION ge EXTENDED_POD_LINK_VERSION ) {
             if ($version) {
-                $pod .= "=item * L<$module|$module>, ".
-                "L<$version|http://search.cpan.org/dist/$dist-$version/lib/$module_path>\n\n";
+                $pod .= "=item * L<$module|$module>, "
+                    . "L<$version|http://search.cpan.org/dist/$dist-$version/lib/$module_path>\n\n";
             } else {
                 $pod .= "=item * L<$module|$module>\n\n";
-            }        
+            }
         } else {
             if ($version) {
                 $pod .= "=item * L<$module|$module>, $version\n\n";
@@ -73,126 +74,131 @@ sub ACTION_contents {
     my @path = split /::/, $self->{properties}->{module_name}
         || $self->{properties}->{module_name};
 
-	#HACK: induced from test suite
-	my $dir = $self->notes('temp_wd')?$self->notes('temp_wd'):'lib';
-	
-    my $file = (join '/', ($cwd, $dir, @path)) .'.pm';
-    open(FIN, '+<', $file)
-        or croak "Unable to open file: $file - $!";
-        
-    my $contents = join '', <FIN>;
-    close(FIN) or croak "Unable to close file: $file - $!";
+    #HACK: induced from test suite
+    my $dir = $self->notes('temp_wd') ? $self->notes('temp_wd') : 'lib';
 
+   ## no critic qw(ValuesAndExpressions::ProhibitNoisyQuotes)
+    my $file = ( join '/', ( $cwd, $dir, @path ) ) . '.pm';
+
+    my $contents = read_file( $file );
+    
     my $rv = $contents =~ s/=head1\s*$section_header\s*.*=head1/$pod/s;
 
-    if (! $rv) {
+    if ( !$rv ) {
         croak "No $section_header section replaced";
     }
 
-    open(FOUT, '>', $file)
+    open my $fout, '>', $file
         or croak "Unable to open file: $file - $!";
-    print FOUT $contents;
-    close(FOUT) or croak "Unable to close file: $file - $!";
+    print $fout $contents;
+    close $fout or croak "Unable to close file: $file - $!";
 
-	return 1;
+    return 1;
 }
 
 #lifted from Module::Build::Base
 sub create_mymeta {
-  my ($self) = @_;
-  my $mymetafile = $self->mymetafile;
-  my $metafile = $self->metafile;
+    my ($self)     = @_;
+    my $mymetafile = $self->mymetafile;
+    my $metafile   = $self->metafile;
 
-  # cleanup
-  if ( $self->delete_filetree($mymetafile) ) {
-    $self->log_verbose("Removed previous '$mymetafile'\n");
-  }
-  $self->log_info("Creating new '$mymetafile' with configuration results\n");
-
-  # use old meta and update prereqs, if possible
-  my $mymeta;
-  if ( -f $metafile ) {
-    $mymeta = eval { $self->read_metafile( $self->metafile ) };
-  }
-  # if we read META OK, just update it
-  if ( defined $mymeta ) {
-    my $prereqs = $self->_normalize_prereqs;
-    for my $t ( keys %$prereqs ) {
-        $mymeta->{$t} = $prereqs->{$t};
+    # cleanup
+    if ( $self->delete_filetree($mymetafile) ) {
+        $self->log_verbose("Removed previous '$mymetafile'\n");
     }
-  }
-  # but generate from scratch, ignoring errors if META doesn't exist
-  else {
-    $mymeta = $self->get_metadata( fatal => 0 );
-  }
+    $self->log_info(
+        "Creating new '$mymetafile' with configuration results\n");
 
-  my $package = ref $self;
-  
-  # MYMETA is always static
-  $mymeta->{dynamic_config} = 0;
-  # Note which M::B created it
-  #JONASBN: changed from originally lifted code
-  $mymeta->{generated_by}
-    = "$package version $VERSION";
+    # use old meta and update prereqs, if possible
+    my $mymeta;
+    if ( -e $metafile ) {
+        $mymeta = eval { $self->read_metafile( $self->metafile ) };
+    }
 
-  $self->write_metafile( $mymetafile, $mymeta );
-  return 1;
+    # if we read META OK, just update it
+    if ( defined $mymeta ) {
+        my $prereqs = $self->_normalize_prereqs;
+        for my $t ( keys %{$prereqs} ) {
+            $mymeta->{$t} = $prereqs->{$t};
+        }
+    }
+
+    # but generate from scratch, ignoring errors if META doesn't exist
+    else {
+        $mymeta = $self->get_metadata( fatal => 0 );
+    }
+
+    my $package = ref $self;
+
+    # MYMETA is always static
+    $mymeta->{dynamic_config} = 0;
+
+    # Note which M::B created it
+    #JONASBN: changed from originally lifted code
+    $mymeta->{generated_by} = "$package version $VERSION";
+
+    $self->write_metafile( $mymetafile, $mymeta );
+    return 1;
 }
 
 #lifted from Module::Build::Base
 sub get_metadata {
-  my ($self, %args) = @_;
+    my ( $self, %args ) = @_;
 
-  my $metadata = {};
-  $self->prepare_metadata( $metadata, undef, \%args );
+    my $metadata = {};
+    $self->prepare_metadata( $metadata, undef, \%args );
 
-  my $package = ref $self;
+    my $package = ref $self;
 
-  #JONASBN: changed from originally lifted code  
-  $metadata->{generated_by}
-    = "$package version $VERSION";
+    #JONASBN: changed from originally lifted code
+    $metadata->{generated_by} = "$package version $VERSION";
 
-  #JONASBN: changed from originally lifted code
-  $metadata->{configure_requires} = { "$package" => $VERSION };
-  
-  return $metadata;
+    #JONASBN: changed from originally lifted code
+    $metadata->{configure_requires} = { "$package" => $VERSION };
+
+    return $metadata;
 }
-
 
 #Lifed from Module::Build::Base
 sub do_create_metafile {
-  my $self = shift;
-  return if $self->{wrote_metadata};
+    my $self = shift;
+    return if $self->{wrote_metadata};
 
-  my $p = $self->{properties};
-  my $metafile = $self->metafile;
+    my $p        = $self->{properties};
+    #JONASBN: changed from originally lifted code
+    my $metafile = $self->metafile;
 
-  unless ($p->{license}) {
-    $self->log_warn("No license specified, setting license = 'unknown'\n");
-    $p->{license} = 'unknown';
-  }
-  unless (exists $self->valid_licenses->{ $p->{license} }) {
-    die "Unknown license type '$p->{license}'";
-  }
+    unless ( $p->{license} ) {
+        $self->log_warn(
+            "No license specified, setting license = 'unknown'\n");
+        $p->{license} = 'unknown';
+    }
+    unless ( exists $self->valid_licenses->{ $p->{license} } ) {
+        croak "Unknown license type '$p->{license}'";
+    }
 
-  # If we're in the distdir, the metafile may exist and be non-writable.
-  $self->delete_filetree($metafile);
-  $self->log_info("Creating $metafile\n");
+    # If we're in the distdir, the metafile may exist and be non-writable.
+    $self->delete_filetree($metafile);
+    $self->log_info("Creating $metafile\n");
 
-  # Since we're building ourself, we have to do some special stuff
-  # here: the ConfigData module is found in blib/lib.
-  local @INC = @INC;
-  if (($self->module_name || '') eq 'Module::Build') {
-    $self->depends_on('config_data');
-    push @INC, File::Spec->catdir($self->blib, 'lib');
-  }
+    # Since we're building ourself, we have to do some special stuff
+    # here: the ConfigData module is found in blib/lib.
+    local @INC = @INC;
+    if ( ( $self->module_name || '' ) eq 'Module::Build' ) {
+        $self->depends_on('config_data');
+        push @INC, File::Spec->catdir( $self->blib, 'lib' );
+    }
 
-  if ($self->write_metafile($self->metafile,$self->get_metadata(fatal=>1))){
-    $self->{wrote_metadata} = 1;
-    $self->_add_to_manifest('MANIFEST', $metafile);
-  }
+    if ($self->write_metafile(
+            $self->metafile, $self->get_metadata( fatal => 1 )
+        )
+        )
+    {
+        $self->{wrote_metadata} = 1;
+        $self->_add_to_manifest( 'MANIFEST', $metafile );
+    }
 
-  return 1;
+    return 1;
 }
 
 1;
@@ -205,7 +211,7 @@ Module::Build::Bundle - subclass for supporting Tasks and Bundles
 
 =head1 VERSION
 
-This documentation describes version 0.07
+This documentation describes version 0.09
 
 =head1 SYNOPSIS
 
@@ -243,8 +249,8 @@ This documentation describes version 0.07
 
 =item * Links to required/listed distributions, with or without versions
 
-=item * Links to specific versions of distributions for perl 5.12.0 if a version
-is specified
+=item * Links to specific versions of distributions for perl 5.12.0 or newer if a 
+version is specified
 
 =item * Inserts a POD section named CONTENTS or something specified by the
 caller
@@ -252,8 +258,8 @@ caller
 =back
 
 This module adds a very basic action for propagating a requirements list from
-a F<Build.PL> file's requires section to the a POD section in the distribution
-targetted.
+a F<Build.PL> file's requires section to the a POD section in a designated
+distribution.
 
 =head1 SUBROUTINES/METHODS
 
@@ -284,7 +290,7 @@ section_header note.
 
 The section of course has to be present.
 
-Based on your version of perl and you F<Build.PL> requirements, the links will
+Based on your version of perl and your F<Build.PL> requirements, the links will
 be rendered in the following formats:
 
 Basic:
@@ -357,6 +363,14 @@ For Module::Build::Bundle:
         Module::Build::Bundle: 0.01
     generated_by: 'Module::Build::Bundle version 0.01'
 
+=head2 do_create_metafile
+
+This method has been lifted from L<Module::Build::Base|Module::Build::Base> and
+altered.
+
+The method was overwritten to be more testable. The method created the relevant
+META file.
+
 =head1 DIAGNOSTICS
 
 =over
@@ -416,7 +430,7 @@ The distribution requires perl version from 5.6.0 and up.
 =head1 BUGS AND LIMITATIONS
 
 Currently Module::Build::Bundle is not able to handle root based distributions
-meaning distribtions with a single Perl module located in the root directory
+meaning distributions with a single Perl module located in the root directory
 instead of the lib structure.
 
 Apart from that there are no known special limitations or bugs at this time,
@@ -424,8 +438,36 @@ but I am certain there are plenty of scenarios is distribution packaging the
 module is not currently handling.
 
 The module only supports Bundle/Task distributions based on L<Module::Build>.
-The implementation is based on a subclass of Module::Build, which can replace
-L<Module::Build> (See: L</SYNOPSIS>).
+The implementation is based on a subclass of L<Module::Build>, which can replace
+L<Module::Build> in your F<Build.PL> (See: L</SYNOPSIS>).
+
+As described previously in the documentation a section of documentation can only
+replaced. A section with the generated contents cannot be added with out a
+placeholder in the form of designated section title. This might be changed in the
+future.
+
+=head1 BUG REPORTING
+
+=head1 TEST AND QUALITY
+
+=head2 TEST COVERAGE
+
+----------------------------------- ------ ------ ------ ------ ------ ------
+File                                  stmt   bran   cond    sub   time  total
+----------------------------------- ------ ------ ------ ------ ------ ------
+lib/Module/Build/Bundle.pm            73.7   50.0   57.1   85.7  100.0   69.0
+Total                                 73.7   50.0   57.1   85.7  100.0   69.0
+----------------------------------- ------ ------ ------ ------ ------ ------
+
+The above coverage report is based on release 0.08
+
+=head1 QUALITY AND CODING STANDARD
+
+=head1 DEVELOPMENT
+
+=head1 TODO
+
+Please see: L<https://logiclab.jira.com/browse/MBB#selectedTab=com.atlassian.jira.plugin.system.project%3Aroadmap-panel>
 
 =head1 SEE ALSO
 
@@ -439,7 +481,9 @@ L<Module::Build> (See: L</SYNOPSIS>).
 
 =item * L<CPAN|CPAN>
 
-=item * L<http://cpansearch.perl.org/src/ANDK/CPAN-1.9402/lib/CPAN/Bundle.pm>
+=item * L<CPAN::Bundle|http://cpansearch.perl.org/src/ANDK/CPAN-1.9402/lib/CPAN/Bundle.pm>
+
+=item * L<https://logiclab.jira.com/wiki/display/OPEN/Module-Build-Bundle>
 
 =back
 
@@ -449,7 +493,7 @@ The motivation was driven by two things.
 
 =over
 
-=item * The joy of fooling around with Module::Build
+=item * The joy of fooling around with L<Module::Build|Module::Build>
 
 =item * The need for automating the documentation generation
 
@@ -483,7 +527,7 @@ but then I needed it for some other distributions, so I decided to separate it o
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2010 jonasbn, all rights reserved.
+Copyright 2010-2012 jonasbn, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

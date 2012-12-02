@@ -16,15 +16,17 @@ name: Module-Build-Bundle
 provides:
   Module::Build::Bundle:
     file: lib/Module/Build/Bundle.pm
-    version: 0.08
+    version: 0.09
 requires:
   Carp: 0
   Cwd: 0
   English: 0
   File::Copy: 0
+  File::Tempdir: 0
   FindBin: 0
   Module::Build::YAML: 0
   Test::Class: 0
+  Test::Exception: 0
   Test::MockObject::Extends: 0
   Test::More: 0
   Tie::IxHash: 0
@@ -37,4 +39,4 @@ resources:
   x_ProjectChangelog: http://logiclab.jira.com/browse/MBB#selectedTab=com.atlassian.jira.plugin.system.project%3Achangelog-panel
   x_ProjectSite: http://logicLAB.jira.com/browse/MBB
   x_ProjectWiki: http://logiclab.jira.com/wiki/display/MBB/Home
-version: 0.08
+version: 0.09

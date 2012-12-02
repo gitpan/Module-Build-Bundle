@@ -1,12 +1,14 @@
 package Test::Class::Module::Build::Bundle::Contents;
 
-# $Id: Contents.pm 7978 2012-11-24 08:13:41Z jonasbn $
+# $Id: Contents.pm 8020 2012-12-02 12:16:15Z jonasbn $
 
 use strict;
 use warnings;
 use Test::More;
 use File::Copy qw(cp);
 use Test::Exception;
+use File::Tempdir;
+use File::Slurp; #read_file
 
 use base qw(Test::Class);
 
@@ -31,90 +33,90 @@ sub setup : Test(setup => 2) {
 
     $test->{build} = $build;
     $test->{file} = 'Dummy.pm';
-	$test->{temp_wd} = 'temp';
 	
-	#this is induced in the code
-	$build->notes('temp_wd' => $test->{temp_wd});
-
-	if (not -e $test->{temp_wd}) {
-        
-        mkdir($test->{temp_wd})
-            or die "Unable to create temp directory $test->{temp_wd} for test: $!";
-	}
+	my $tmpdir = File::Tempdir->new();
+    $test->{tempdir} = $tmpdir;
+    $test->{temp_wd} = $tmpdir->name;
+    
+    chmod '0400', $tmpdir->name
+        or die "Unable to change permission for: ".$tmpdir->name;
+    
+    #this is induced in the code
+    $build->notes('temp_wd' => $test->{temp_wd});
+    
+    if (! -e $test->{temp_wd} or ! -w _) {
+        $test->{unfriendly_fs} = 1;
+    }
 };
 
-sub contents : Test(3) {
+sub contents : Test(4) {
     my $test = shift;
     
     my $build = $test->{build};
     
     SKIP: {
-        skip "file system is not cooperative", 3, if (! -w $test->{temp_wd});
+        skip "file system is not cooperative", 4, $test->{unfriendly_fs};
     
-        cp("t/$test->{file}", "$test->{temp_wd}/$test->{file}")
-            or die "Unable to copy file: $test->{file} - $!";
+        unless ($test->{unfriendly_fs}) {
+            cp("t/$test->{file}", "$test->{temp_wd}/$test->{file}")
+                or die "Unable to copy file: $test->{file} - $!";
+        }
 
         #HACK: we cheat and pretend to be 5.10.1
         $Module::Build::Bundle::myPERL_VERSION = 5.10.1;
     
-        ok($build->ACTION_contents);
+        ok($build->ACTION_contents, 'executing ACTION_contents');
     
-        open FIN, '<', "$test->{temp_wd}/$test->{file}"
-            or die "Unable to open file: $!";
-		
-        my $content = join '', <FIN>;
-        close FIN;
+        ok(my $content = read_file( "$test->{temp_wd}/$test->{file}" ), 'reading file contents');
     
-        like($content, qr/=item \* L<Module::Build\|Module::Build>/s);
-        like($content, qr/=item \* L<Text::Soundex\|Text::Soundex>, 2\.00/);
+        like($content, qr/=item \* L<Module::Build\|Module::Build>/s, 'asserting Module::Build item');
+        like($content, qr/=item \* L<Text::Soundex\|Text::Soundex>, 2\.00/, 'asserting Text::Soundex item');
 
         $test->{build} = $build;
     }
 };
 
-sub extended : Test(3) {
+sub extended : Test(5) {
     my $test = shift;
     
     my $build = $test->{build};
 
     SKIP: {
-        skip "file system is not cooperative", 3, if (! -w $test->{temp_wd});
+        skip "file system is not cooperative", 5, $test->{unfriendly_fs};
     
-        cp("t/$test->{file}", "$test->{temp_wd}/$test->{file}")
-            or die "Unable to copy file: $test->{file} - $!";
+        ok(cp("t/$test->{file}", "$test->{temp_wd}/$test->{file}"), 'Copying test file'
+                or diag ("Unable to copy file: $test->{file} - $!"));
     
         #HACK: we cheat and pretend to be 5.12.0
         $Module::Build::Bundle::myPERL_VERSION = 5.12.0;
     
-        ok($build->ACTION_contents);
+        ok($build->ACTION_contents, 'executing ACTION_contents');
 
-        open FIN, '<', "$test->{temp_wd}/$test->{file}" or die "Unable to open file: $!";
-        my $content = join '', <FIN>;
-        close FIN;
-    
-        like($content, qr/=item \* L<Module::Build\|Module::Build>/s);
-        like($content, qr[=item \* L<Text::Soundex\|Text::Soundex>, L<2\.00\|http://search.cpan.org/dist/Text-Soundex-2\.00/lib/Text/Soundex.pm>]);
+        ok(my $content = read_file( "$test->{temp_wd}/$test->{file}" ), 'reading file contents');
+        
+        like($content, qr/=item \* L<Module::Build\|Module::Build>/s, 'asserting Module::Build item');
+        like($content, qr[=item \* L<Text::Soundex\|Text::Soundex>, L<2\.00\|http://search.cpan.org/dist/Text-Soundex-2\.00/lib/Text/Soundex.pm>], 'asserting Text::Soundex item');
     }
 };
 
-sub death_by_section_header : Test(1) {
+sub death_by_section_header : Test(2) {
     my $test = shift;
     
     my $build = $test->{build};
 
     SKIP: {
-        skip "file system is not cooperative", 1, if (! -w $test->{temp_wd});
+        skip "file system is not cooperative", 2, $test->{unfriendly_fs};
     
-        cp("t/$test->{file}", "$test->{temp_wd}/$test->{file}")
-            or die "Unable to copy file: $test->{temp_wd}/$test->{file} - $!";
-
+        ok(cp("t/$test->{file}", "$test->{temp_wd}/$test->{file}"), 'Copying test file'
+                or diag("Unable to copy file: $test->{temp_wd}/$test->{file} - $!"));
+        
         $build->notes('section_header' => 'TO DEATH');
         
         dies_ok { $build->ACTION_contents } 'Unable to replace section';
     }
 };
 
-sub section_header : Test(2) {
+sub section_header : Test(3) {
     my $test = shift;
 
     ok(my $build = Module::Build::Bundle->new(
@@ -132,12 +134,12 @@ sub section_header : Test(2) {
     $test->{file} = 'Dummy2.pm';
     
     SKIP: {
-        skip "file system is not cooperative", 1, if (! -w $test->{temp_wd});
+        skip "file system is not cooperative", 2, $test->{unfriendly_fs};
     
-        cp("t/$test->{file}", "$test->{temp_wd}/$test->{file}")
-            or die "Unable to copy file: $test->{file} - $!";
+        ok(cp("t/$test->{file}", "$test->{temp_wd}/$test->{file}"), 'Copying test file'
+                or diag ("Unable to copy file: $test->{file} - $!"));
 
-        ok($build->ACTION_contents);
+        ok($build->ACTION_contents, 'executing ACTION_contents');
     
         $test->{build} = $build;
     }
@@ -150,16 +152,16 @@ sub teardown : Test(teardown) {
     my $file = $test->{file};
     my $build = $test->{build};
     
-    if (-e "$test->{temp_wd}/$file") {
+    #if (-e "$test->{temp_wd}/$file") {
+    #
+    #    unlink("$test->{temp_wd}/$file") 
+    #        or die "Unable to remove file: $test->{temp_wd}/$file - $!";
+    #}
     
-        unlink("$test->{temp_wd}/$file") 
-            or die "Unable to remove file: $test->{temp_wd}/$file - $!";
-    }
-    
-    if (-e $test->{temp_wd}) {
-        rmdir($test->{temp_wd})
-        	or die "Unable to remove directory: $test->{temp_wd} - $!";
-    }
+    #if (-e $test->{temp_wd}) {
+    #    rmdir($test->{temp_wd})
+    #    	or die "Unable to remove directory: $test->{temp_wd} - $!";
+    #}
 
     $build->notes('section_header' => '');
 }
