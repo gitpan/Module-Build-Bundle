@@ -1,6 +1,6 @@
 # Build.PL for Module::Build::Bundle
 
-# $Id: Build.PL 8015 2012-12-02 07:52:46Z jonasbn $
+# $Id: Build.PL 8035 2013-01-26 15:48:36Z jonasbn $
 
 use strict;
 use warnings;
@@ -23,6 +23,7 @@ my $build = Module::Build->new(
         'Cwd'                 => '0',
         'English'             => '0',
         'File::Copy'          => '0',       #test
+        'File::Slurp'         => '0',
         'FindBin'             => '0',       #test
         'Module::Build::YAML' => '0',       #test
         'Test::Class'         => '0',       #test
