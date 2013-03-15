@@ -1,6 +1,6 @@
 package Module::Build::Bundle;
 
-# $Id: Bundle.pm 8036 2013-01-26 15:49:10Z jonasbn $
+# $Id: Bundle.pm 8100 2013-03-15 08:23:53Z jonasbn $
 
 use 5.006;    #$^V
 use strict;
@@ -9,12 +9,16 @@ use Carp qw(croak);
 use Cwd qw(getcwd);
 use Tie::IxHash;
 use English qw( -no_match_vars );
-use File::Slurp; #read_file
+use File::Slurp;    #read_file
 use base qw(Module::Build);
+use utf8;
 
 use constant EXTENDED_POD_LINK_VERSION => 5.12.0;
+use constant PERMISSION_MASK           => '07777';
+use constant WRITEPERMISSION           => '0644';
+use constant FILEMODE                  => 2;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 #HACK: we need a writable copy for testing purposes
 ## no critic qw(Variables::ProhibitPackageVars Variables::ProhibitPunctuationVars)
@@ -75,22 +79,32 @@ sub ACTION_contents {
         || $self->{properties}->{module_name};
 
     #HACK: induced from test suite
-    my $dir = $self->notes('temp_wd') ? $self->notes('temp_wd') : 'lib';
+    my $dir = $self->notes('temp_wd') ? $self->notes('temp_wd') : 'blib/lib';
 
-   ## no critic qw(ValuesAndExpressions::ProhibitNoisyQuotes)
+    ## no critic qw(ValuesAndExpressions::ProhibitNoisyQuotes)
     my $file = ( join '/', ( $cwd, $dir, @path ) ) . '.pm';
 
-    my $contents = read_file( $file );
-    
+    my $contents = read_file($file);
+
     my $rv = $contents =~ s/=head1\s*$section_header\s*.*=head1/$pod/s;
 
     if ( !$rv ) {
         croak "No $section_header section replaced";
     }
 
+    ## no critic (Bangs::ProhibitBitwiseOperators)
+    my $permissions = ( stat $file )[FILEMODE] & PERMISSION_MASK;
+    chmod WRITEPERMISSION, $file
+        or croak "Unable to make file: $file writable - $!";
+
     open my $fout, '>', $file
         or croak "Unable to open file: $file - $!";
+
     print $fout $contents;
+
+    chmod $permissions, $file
+        or croak "Unable to reinstate permissions for file: $file - $!";
+
     close $fout or croak "Unable to close file: $file - $!";
 
     return 1;
@@ -164,7 +178,8 @@ sub do_create_metafile {
     my $self = shift;
     return if $self->{wrote_metadata};
 
-    my $p        = $self->{properties};
+    my $p = $self->{properties};
+
     #JONASBN: changed from originally lifted code
     my $metafile = $self->metafile;
 
@@ -190,7 +205,7 @@ sub do_create_metafile {
     }
 
     if ($self->write_metafile(
-            $self->metafile, $self->get_metadata( fatal => 1 )
+            $self->metafile, $self->get_metadata( fatal => 1 ),
         )
         )
     {
@@ -211,7 +226,7 @@ Module::Build::Bundle - subclass for supporting Tasks and Bundles
 
 =head1 VERSION
 
-This documentation describes version 0.09
+This documentation describes version 0.11
 
 =head1 SYNOPSIS
 
@@ -446,22 +461,53 @@ replaced. A section with the generated contents cannot be added with out a
 placeholder in the form of designated section title. This might be changed in the
 future.
 
+Before version 0.11 the designated module was worked on in F<lib/>, I am still
+unsure as to what the right place to do this is. Perhaps I<hooking> into the
+build phase is not a good idea at all.
+
 =head1 BUG REPORTING
+
+Please report any bugs or feature requests via:
+
+=over
+
+=item * email: bug−module-build-bundle at rt.cpan.org
+
+=item * HTTP: L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Module-Build-Bundle>
+
+=back
 
 =head1 TEST AND QUALITY
 
 =head2 TEST COVERAGE
 
------------------------------------ ------ ------ ------ ------ ------ ------
-File                                  stmt   bran   cond    sub   time  total
------------------------------------ ------ ------ ------ ------ ------ ------
-lib/Module/Build/Bundle.pm            73.7   50.0   57.1   85.7  100.0   69.0
-Total                                 73.7   50.0   57.1   85.7  100.0   69.0
------------------------------------ ------ ------ ------ ------ ------ ------
+    ---------------------------- ------ ------ ------ ------ ------ ------ ------
+    File                           stmt   bran   cond    sub    pod   time  total
+    ---------------------------- ------ ------ ------ ------ ------ ------ ------
+    lib/Module/Build/Bundle.pm     48.5   13.9   14.3   84.2  100.0  100.0   45.7
+    Total                          48.5   13.9   14.3   84.2  100.0  100.0   45.7
+    ---------------------------- ------ ------ ------ ------ ------ ------ ------
 
-The above coverage report is based on release 0.08
+The above coverage report is based on release 0.11
 
 =head1 QUALITY AND CODING STANDARD
+
+The code passes L<Perl::Critic> tests a severity: 1 (brutal)
+
+The following policies have been disabled:
+
+       Perl::Critic::Policy::InputOutput::RequireBracedFileHandleWithPrint
+
+L<Perl::Critic> resource file, can be located in the F<t/> directory of the
+distribution see F <t/perlcriticrc>
+
+L<Perl::Tidy> resource file, can be obtained from the following URL:
+
+=over
+
+=item * L<https://logiclab.jira.com/wiki/display/OPEN/Perl-Tidy>
+
+=back
 
 =head1 DEVELOPMENT
 
@@ -515,6 +561,10 @@ but then I needed it for some other distributions, so I decided to separate it o
 
 =item * The L<Module::Build> developers
 
+=item * Lars Dɪᴇᴄᴋᴏᴡ (DAXIM) for reporting RT:83754, resulting in release 0.11
+
+=item * Andreas J. König (ANDK) for reporting RT:82128, included in release 0.10
+
 =back
 
 =head1 AUTHOR
@@ -527,7 +577,7 @@ but then I needed it for some other distributions, so I decided to separate it o
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2010-2012 jonasbn, all rights reserved.
+Copyright 2010-2013 jonasbn, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

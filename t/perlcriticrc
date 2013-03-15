@@ -35,6 +35,12 @@ allow = $@ $!
 #We subclass Module::Build so this is required
 [-NamingConventions::Capitalization]
 
+#I prefer UTF-8 
+[-CodeLayout::RequireASCII]
+
+#The policy unfortunately catches TODO in the POD
+[-Bangs::ProhibitFlagComments]
+
 # TODO
 
 [-InputOutput::RequireBracedFileHandleWithPrint]

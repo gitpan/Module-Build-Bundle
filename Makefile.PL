@@ -3,26 +3,26 @@ require 5.006000;
 use ExtUtils::MakeMaker;
 WriteMakefile
 (
-  'NAME' => 'Module::Build::Bundle',
-  'VERSION_FROM' => 'lib/Module/Build/Bundle.pm',
-  'PREREQ_PM' => {
-                   'Carp' => '0',
-                   'Cwd' => '0',
-                   'English' => '0',
-                   'File::Copy' => '0',
-                   'File::Slurp' => '0',
-                   'File::Tempdir' => '0',
-                   'FindBin' => '0',
-                   'Module::Build' => 0,
-                   'Module::Build::YAML' => '0',
-                   'Test::Class' => '0',
-                   'Test::Exception' => '0',
-                   'Test::MockObject::Extends' => '0',
-                   'Test::More' => '0',
-                   'Tie::IxHash' => '0'
-                 },
-  'INSTALLDIRS' => 'site',
-  'EXE_FILES' => [],
-  'PL_FILES' => {}
-)
+          'NAME' => 'Module::Build::Bundle',
+          'VERSION_FROM' => 'lib/Module/Build/Bundle.pm',
+          'PREREQ_PM' => {
+                           'Carp' => '0',
+                           'Cwd' => '0',
+                           'English' => '0',
+                           'File::Copy' => '0',
+                           'File::Slurp' => '0',
+                           'File::Tempdir' => '0',
+                           'FindBin' => '0',
+                           'Module::Build' => 0,
+                           'Module::Build::YAML' => '0',
+                           'Test::Class' => '0',
+                           'Test::Exception' => '0',
+                           'Test::MockObject::Extends' => '0',
+                           'Test::More' => '0',
+                           'Tie::IxHash' => '0'
+                         },
+          'INSTALLDIRS' => 'site',
+          'EXE_FILES' => [],
+          'PL_FILES' => {}
+        )
 ;

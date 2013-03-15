@@ -15,4 +15,5 @@ t/pod.t
 t/runtests.t
 t/Test/Class/Module/Build/Bundle.pm
 t/Test/Class/Module/Build/Bundle/Contents.pm
+t/testMETA.json
 TODO
